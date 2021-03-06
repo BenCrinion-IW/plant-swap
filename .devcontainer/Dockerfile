@@ -1,4 +1,4 @@
-FROM ubuntu:bionic
+FROM ubuntu:focal
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -10,7 +10,7 @@ ARG USER_GID=1000
 
 # Configure apt and install packages
 RUN apt-get update \
-    && apt-get -y install --no-install-recommends apt-utils dialog 2>&1 
+    && apt-get -y install --no-install-recommends sudo apt-utils dialog 2>&1 
     #
     # install git iproute2, required tools installed
 RUN apt-get install -y \
@@ -44,6 +44,13 @@ RUN curl -fsSL https://deb.nodesource.com/setup_15.x | bash - && \
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd -s /bin/bash --uid $USER_UID --gid $USER_GID -m $USERNAME
 
+#
+# Add sudo support for the non-root user
+#
+RUN echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME\
+    && chmod 0440 /etc/sudoers.d/$USERNAME
 
 # [Optional] Uncomment this line to install global node packages.
 # RUN su vscode -c "source /usr/local/share/nvm/nvm.sh && npm install -g <your-package-here>" 2>&1
+
+ENV DEBIAN_FRONTEND=dialog

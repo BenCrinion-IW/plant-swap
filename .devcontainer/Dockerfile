@@ -1,28 +1,49 @@
-FROM mcr.microsoft.com/vscode/devcontainers/java:dev-8
+FROM ubuntu:bionic
 
-# [Option] Install Maven
-ARG INSTALL_MAVEN="false"
-ARG MAVEN_VERSION=""
-# [Option] Install Gradle
-ARG INSTALL_GRADLE="false"
-ARG GRADLE_VERSION=""
-RUN if [ "${INSTALL_MAVEN}" = "true" ]; then su vscode -c "umask 0002 && . /usr/local/sdkman/bin/sdkman-init.sh && sdk install maven \"${MAVEN_VERSION}\""; fi \
-    && if [ "${INSTALL_GRADLE}" = "true" ]; then su vscode -c "umask 0002 && . /usr/local/sdkman/bin/sdkman-init.sh && sdk install gradle \"${GRADLE_VERSION}\""; fi
+# Avoid warnings by switching to noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
-# [Option] Install Node.js
-ARG INSTALL_NODE="true"
-ARG NODE_VERSION="lts/*"
-RUN if [ "${INSTALL_NODE}" = "true" ]; then su vscode -c "umask 0002 && . /usr/local/share/nvm/nvm.sh && nvm install ${NODE_VERSION} 2>&1"; fi
+ARG USERNAME=vscode
+ARG USER_UID=1000
+ARG USER_GID=1000
 
-# [Optional] Uncomment this section to install additional OS packages.
-# RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-#     && apt-get -y install --no-install-recommends <your-package-list-here>
 
-RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - \
-    && echo 'deb https://deb.nodesource.com/node_12.x buster main' > /etc/apt/sources.list.d/nodesource.list \
-    && echo 'deb-src https://deb.nodesource.com/node_12.x buster main' >> /etc/apt/sources.list.d/nodesource.list \
-    && apt-get -y update \
-    && apt-get -y install nodejs
+# Configure apt and install packages
+RUN apt-get update \
+    && apt-get -y install --no-install-recommends apt-utils dialog 2>&1 
+    #
+    # install git iproute2, required tools installed
+RUN apt-get install -y \
+    bash-completion \
+    git \
+    openssh-client \
+    less \
+    curl \
+    procps \
+    unzip \
+    apt-transport-https \
+    ca-certificates \
+    gnupg-agent \
+    software-properties-common \
+    python3-pip \
+    graphviz \
+    jq \
+    vim \
+    lsb-release 2>&1
+
+
+RUN curl -fsSL https://deb.nodesource.com/setup_15.x | bash - && \
+    apt-get install -y nodejs
+
+
+
+
+#
+# Create a non-root user to use if preferred - see https://aka.ms/vscode-remote/containers/non-root-user.
+#
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd -s /bin/bash --uid $USER_UID --gid $USER_GID -m $USERNAME
+
 
 # [Optional] Uncomment this line to install global node packages.
 # RUN su vscode -c "source /usr/local/share/nvm/nvm.sh && npm install -g <your-package-here>" 2>&1

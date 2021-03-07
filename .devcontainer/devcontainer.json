@@ -1,5 +1,5 @@
 {
-	"name": "Java 8",
+	"name": "Expo React Native",
 	"build": {
 		"dockerfile": "Dockerfile",
 		"args": {
@@ -38,7 +38,7 @@
 	],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
+	// "forwardPorts": [19000,001, 19002],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "java -version",
